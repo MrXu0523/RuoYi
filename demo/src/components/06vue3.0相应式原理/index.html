@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <input type="text">
+  <p></p>
+</body>
+
+</html>
+<script>
+  let oInput = document.querySelector('input');
+  let op = document.querySelector('p');
+  // 目标对象
+  let obj = {
+    name: '张三',
+    age: 18,
+    sex: '男'
+  }
+  // 将目标对象转为代理对象  new Proxy(目标对象,{进行设置,监视数据})
+  const proxyObj = new Proxy(obj, {
+    // 获取目标对象的属性值(目标对象,目标对象的属性,代理对象)
+    get(target, key, accede) {
+      console.log('get方法调用了');
+      console.log(target, 'target');
+      console.log(key, 'key');
+      console.log(accede, 'accede');
+
+      // Reflect.get反射对象，允许你在对象中获取属性
+      return Reflect.get(target, key, accede);
+    },
+    // 设置数据(目标对象,目标对象的属性,目标对象的属性值,代理对象)
+    set(target, key, value) {
+      console.log('set方法调用了');
+      console.log(target, 'SETtarget');
+      console.log(value, 'value');
+      console.log(key, 'key');
+      // 因为oInput是通过value值来进行绑定数据的
+      oInput.value = target.name;
+      console.log(oInput.value, 'oInput.value');
+
+      // 因为p标签是没有value值的所以需要使用innerHTML来进行渲染页面
+      op.innerHTML = target.name;
+      return Reflect.set(target, key, value);
+    },
+    // 删除对象属性
+    deleteProperty(target, key) {
+      console.log('deleteProperty方法调用了,劫持', target, key)
+      // Reflect.deleteProperty反射对象，允许你在对象删除属性
+      return Reflect.deleteProperty(target, key);
+    }
+  })
+  // 调用代理对象里面的name属性，会自动触发get
+  console.log(proxyObj.name);
+  // 当我修改设置代理对象里面的name属性，会自动触发set
+  proxyObj.name = '困死我了';
+  // 当我反射对象里面的属性的时候，会自动触发deleteProperty方法
+  delete proxyObj.sex;
+  console.log(proxyObj.sex, 'proxyObj');
+  oInput.addEventListener('input', function () {
+    op.innerHTML = oInput.value;
+  })
+
+
+</script>
